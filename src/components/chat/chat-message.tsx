@@ -5,13 +5,15 @@ import { cn } from "@/lib/utils";
 import { Bot, User, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ResultsTable } from "@/components/chat/results-table";
 import { useState } from "react";
 
 interface ChatMessageProps {
   message: ChatMessageType;
+  onSaveRecipe?: () => void;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
@@ -110,12 +112,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
         )}
 
-        {message.results && (
-          <div className="flex items-center gap-2">
-            <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
-              {message.results.itemsCount} items scraped
-            </Badge>
-          </div>
+        {message.results && message.results.data.length > 0 && (
+          <ResultsTable results={message.results} onSaveRecipe={onSaveRecipe} />
         )}
 
         {message.error && (
