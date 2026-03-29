@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { ChatMessage as ChatMessageType } from "@/types/chat";
 import { MessageSquare } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
@@ -19,6 +20,29 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleSaveRecipe = useCallback(async (message: ChatMessageType) => {
+    if (!message.generatedScript) return;
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const name = message.content.slice(0, 60) + (message.content.length > 60 ? "..." : "");
+
+    await supabase.from("recipes").insert({
+      user_id: user.id,
+      name,
+      description: message.content,
+      url_pattern: null,
+      script_template: message.generatedScript,
+      schema_definition: message.zodSchema || null,
+    });
+  }, []);
+
+  const handleNewChat = useCallback(() => {
+    setMessages([]);
+  }, []);
 
   const handleSend = async (content: string) => {
     const userMessage: ChatMessageType = {
@@ -62,7 +86,7 @@ export default function ChatPage() {
             ? {
                 ...msg,
                 content: data.message,
-                status: "complete",
+                status: "complete" as const,
                 generatedScript: data.script,
                 zodSchema: data.schema,
                 results: data.results,
@@ -77,7 +101,7 @@ export default function ChatPage() {
             ? {
                 ...msg,
                 content: "Something went wrong. Please try again.",
-                status: "error",
+                status: "error" as const,
                 error: err instanceof Error ? err.message : "Unknown error",
               }
             : msg
@@ -90,7 +114,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen bg-[var(--background)]">
-      <ChatSidebar />
+      <ChatSidebar onNewChat={handleNewChat} />
 
       <div className="flex flex-1 flex-col">
         {messages.length === 0 ? (
@@ -126,7 +150,15 @@ export default function ChatPage() {
           <div className="flex-1 overflow-auto px-6">
             <div className="mx-auto max-w-3xl">
               {messages.map((msg) => (
-                <ChatMessage key={msg.id} message={msg} />
+                <ChatMessage
+                  key={msg.id}
+                  message={msg}
+                  onSaveRecipe={
+                    msg.role === "assistant" && msg.generatedScript
+                      ? () => handleSaveRecipe(msg)
+                      : undefined
+                  }
+                />
               ))}
               <div ref={messagesEndRef} />
             </div>

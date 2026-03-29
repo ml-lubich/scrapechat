@@ -17,7 +17,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-export function ChatSidebar() {
+interface ChatSidebarProps {
+  onNewChat?: () => void;
+}
+
+export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -64,7 +68,14 @@ export function ChatSidebar() {
         </div>
 
         <div className="p-3">
-          <Button variant="outline" className="w-full justify-start gap-2">
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => {
+              onNewChat?.();
+              setOpen(false);
+            }}
+          >
             <Plus className="h-4 w-4" />
             New Chat
           </Button>
