@@ -4,8 +4,8 @@ import { ChatMessage as ChatMessageType } from "@/types/chat";
 import { cn } from "@/lib/utils";
 import { Bot, User, Copy, Check, AlertCircle, ClipboardList, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ResultsTable } from "@/components/chat/results-table";
+import { CodeBlock } from "@/components/ui/code-block";
 import { useState, useCallback } from "react";
 
 interface ChatMessageProps {
@@ -16,8 +16,6 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message, onSaveRecipe, onRetry }: ChatMessageProps) {
   const isUser = message.role === "user";
-  const [copiedScript, setCopiedScript] = useState(false);
-  const [copiedSchema, setCopiedSchema] = useState(false);
   const [copiedResults, setCopiedResults] = useState(false);
 
   const copyToClipboard = useCallback((text: string, setter: (v: boolean) => void) => {
@@ -84,61 +82,22 @@ export function ChatMessage({ message, onSaveRecipe, onRetry }: ChatMessageProps
         )}
 
         {message.generatedScript && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  Playwright
-                </Badge>
-                <span className="text-xs text-[var(--muted-foreground)]">
-                  Generated Script
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => copyToClipboard(message.generatedScript!, setCopiedScript)}
-              >
-                {copiedScript ? (
-                  <Check className="h-3 w-3 text-green-500" />
-                ) : (
-                  <Copy className="h-3 w-3" />
-                )}
-              </Button>
-            </div>
-            <pre className="max-h-64 overflow-auto p-3 text-xs">
-              <code>{message.generatedScript}</code>
-            </pre>
-          </div>
+          <CodeBlock
+            code={message.generatedScript}
+            language="typescript"
+            label="Playwright"
+            description="Generated Script"
+          />
         )}
 
         {message.zodSchema && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  Zod
-                </Badge>
-                <span className="text-xs text-[var(--muted-foreground)]">
-                  Validation Schema
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => copyToClipboard(message.zodSchema!, setCopiedSchema)}
-              >
-                {copiedSchema ? (
-                  <Check className="h-3 w-3 text-green-500" />
-                ) : (
-                  <Copy className="h-3 w-3" />
-                )}
-              </Button>
-            </div>
-            <pre className="max-h-40 overflow-auto p-3 text-xs">
-              <code>{message.zodSchema}</code>
-            </pre>
-          </div>
+          <CodeBlock
+            code={message.zodSchema}
+            language="typescript"
+            label="Zod"
+            description="Validation Schema"
+            maxHeight="max-h-40"
+          />
         )}
 
         {message.results && message.results.data.length > 0 && (
