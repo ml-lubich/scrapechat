@@ -73,6 +73,19 @@ export default function ChatPage() {
     loadHistory();
   }, []);
 
+  // Auto-send ?message= query param (e.g. from recipe redirect)
+  const autoSendFired = useRef(false);
+  useEffect(() => {
+    if (!historyLoaded || autoSendFired.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const prefill = params.get("message");
+    if (prefill) {
+      autoSendFired.current = true;
+      window.history.replaceState({}, "", window.location.pathname);
+      handleSend(prefill);
+    }
+  }, [historyLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -115,6 +128,18 @@ export default function ChatPage() {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
+
+  const handleRetry = useCallback((failedMessageId: string) => {
+    const failedIndex = messages.findIndex((m) => m.id === failedMessageId);
+    if (failedIndex < 1) return;
+
+    const precedingUserMessage = messages[failedIndex - 1];
+    if (precedingUserMessage.role !== "user") return;
+
+    const originalContent = precedingUserMessage.content;
+    setMessages((prev) => prev.filter((m) => m.id !== failedMessageId));
+    handleSend(originalContent);
+  }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSend = async (content: string) => {
     const userMessage: ChatMessageType = {
@@ -259,6 +284,11 @@ export default function ChatPage() {
                   onSaveRecipe={
                     msg.role === "assistant" && msg.generatedScript
                       ? () => handleSaveRecipe(msg)
+                      : undefined
+                  }
+                  onRetry={
+                    msg.role === "assistant" && msg.status === "error"
+                      ? () => handleRetry(msg.id)
                       : undefined
                   }
                 />

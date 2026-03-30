@@ -2,7 +2,7 @@
 
 import { ChatMessage as ChatMessageType } from "@/types/chat";
 import { cn } from "@/lib/utils";
-import { Bot, User, Copy, Check, AlertCircle, ClipboardList } from "lucide-react";
+import { Bot, User, Copy, Check, AlertCircle, ClipboardList, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ResultsTable } from "@/components/chat/results-table";
@@ -11,9 +11,10 @@ import { useState, useCallback } from "react";
 interface ChatMessageProps {
   message: ChatMessageType;
   onSaveRecipe?: () => void;
+  onRetry?: () => void;
 }
 
-export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
+export function ChatMessage({ message, onSaveRecipe, onRetry }: ChatMessageProps) {
   const isUser = message.role === "user";
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedSchema, setCopiedSchema] = useState(false);
@@ -169,6 +170,18 @@ export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>{message.error}</span>
           </div>
+        )}
+
+        {!isUser && message.status === "error" && onRetry && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            onClick={onRetry}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Retry
+          </Button>
         )}
       </div>
 
