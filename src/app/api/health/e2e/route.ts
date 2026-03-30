@@ -27,7 +27,7 @@ export async function GET() {
 
   const [readCheck, authCheck] = await Promise.all([
     checkSupabaseRead(url, key),
-    checkSupabaseAuth(url),
+    checkSupabaseAuth(url, key),
   ]);
 
   const checks: Record<string, E2ECheck> = {
@@ -72,12 +72,12 @@ async function checkSupabaseRead(url: string, key: string): Promise<E2ECheck> {
   }
 }
 
-async function checkSupabaseAuth(supabaseUrl: string): Promise<E2ECheck> {
+async function checkSupabaseAuth(supabaseUrl: string, anonKey: string): Promise<E2ECheck> {
   const start = Date.now();
   try {
     const response = await Promise.race([
       fetch(`${supabaseUrl}/auth/v1/health`, {
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", apikey: anonKey },
       }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Auth check timed out")), TIMEOUT_MS)
