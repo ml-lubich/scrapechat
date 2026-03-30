@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
+import { FREE_TIER_LIMIT, MAX_MESSAGE_LENGTH } from "@/lib/constants";
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
-
-const FREE_TIER_LIMIT = 50;
 
 const SYSTEM_PROMPT = `You are ScrapeChatAI, an expert web scraping assistant. When a user describes what they want to scrape, you:
 
@@ -71,7 +70,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const MAX_MESSAGE_LENGTH = 2000;
     if (message.length > MAX_MESSAGE_LENGTH) {
       return NextResponse.json(
         { error: `Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters.` },

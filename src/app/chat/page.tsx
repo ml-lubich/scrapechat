@@ -8,9 +8,7 @@ import { ChatMessage as ChatMessageType } from "@/types/chat";
 import { ScrapeJob } from "@/types/database";
 import { MessageSquare, ShoppingCart, Utensils, Briefcase, Newspaper } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-
-const HISTORY_LIMIT = 20;
-const CONTEXT_MESSAGE_LIMIT = 6;
+import { HISTORY_LIMIT, CONTEXT_MESSAGE_LIMIT } from "@/lib/constants";
 
 function scrapeJobToMessages(job: ScrapeJob): ChatMessageType[] {
   const userMsg: ChatMessageType = {

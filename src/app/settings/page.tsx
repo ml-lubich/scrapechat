@@ -8,8 +8,7 @@ import { Loader2, History, Key } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/database";
-
-const FREE_TIER_LIMIT = 50;
+import { FREE_TIER_LIMIT } from "@/lib/constants";
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
