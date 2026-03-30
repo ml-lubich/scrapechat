@@ -1,10 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
-import { BookOpen, Play, Trash2, Loader2, Search, MessageSquare } from "lucide-react";
+import { RecipeCard, RecipeUpdateFields } from "@/components/recipes/recipe-card";
+import { BookOpen, Loader2, Search, MessageSquare } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Recipe } from "@/types/database";
@@ -76,17 +75,31 @@ export default function RecipesPage() {
     window.location.href = `/chat?message=${encodeURIComponent(recipe.description || recipe.name)}`;
   };
 
+  const handleSave = async (id: string, updates: RecipeUpdateFields): Promise<boolean> => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from("recipes")
+      .update(updates)
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Failed to update recipe:", error);
+      return false;
+    }
+
+    setRecipes((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
+    );
+    return true;
+  };
+
   const filteredRecipes = recipes.filter((recipe) =>
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
 
   return (
     <div className="flex h-screen bg-[var(--background)]">
@@ -143,43 +156,13 @@ export default function RecipesPage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {filteredRecipes.map((recipe) => (
-                <Card key={recipe.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg">{recipe.name}</CardTitle>
-                      <Badge variant="secondary" className="shrink-0 text-xs">
-                        {recipe.times_used} run{recipe.times_used !== 1 ? "s" : ""}
-                      </Badge>
-                    </div>
-                    <CardDescription>{recipe.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[var(--muted-foreground)]">
-                        Created {formatDate(recipe.created_at)}
-                      </span>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5"
-                          onClick={() => handleRun(recipe)}
-                        >
-                          <Play className="h-3.5 w-3.5" />
-                          Run
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-600"
-                          onClick={() => handleDelete(recipe.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onRun={handleRun}
+                  onDelete={handleDelete}
+                  onSave={handleSave}
+                />
               ))}
             </div>
           )}
