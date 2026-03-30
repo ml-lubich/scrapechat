@@ -4,7 +4,7 @@ import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, History, Key } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/database";
@@ -15,6 +15,10 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = "Settings — ScrapeChatAI";
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -135,6 +139,52 @@ export default function SettingsPage() {
                 <p className="text-xs text-[var(--muted-foreground)] pt-2">
                   Signed in via Google OAuth. Account management is handled through your Google account.
                 </p>
+              </CardContent>
+            </Card>
+
+            <div className="border-t border-[var(--border)]" />
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <History className="h-5 w-5 text-[var(--muted-foreground)]" />
+                  <div>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>Your scraping history and usage</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[var(--border)] py-10">
+                  <History className="mb-3 h-8 w-8 text-[var(--muted-foreground)]" />
+                  <p className="text-sm font-medium text-[var(--muted-foreground)]">Coming soon</p>
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    View your recent scraping jobs and their results here.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="border-t border-[var(--border)]" />
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-[var(--muted-foreground)]" />
+                  <div>
+                    <CardTitle>API Access</CardTitle>
+                    <CardDescription>Manage API keys for programmatic access</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[var(--border)] py-10">
+                  <Key className="mb-3 h-8 w-8 text-[var(--muted-foreground)]" />
+                  <p className="text-sm font-medium text-[var(--muted-foreground)]">Coming soon</p>
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Generate API keys to integrate ScrapeChatAI into your workflows.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>

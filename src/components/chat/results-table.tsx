@@ -75,8 +75,8 @@ export function ResultsTable({ results, onSaveRecipe }: ResultsTableProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">
-          {data.length} result{data.length !== 1 ? "s" : ""}
+        <span className="text-sm font-medium text-[var(--muted-foreground)]">
+          Showing {data.length} result{data.length !== 1 ? "s" : ""}
         </span>
         <div className="flex items-center gap-2">
           {onSaveRecipe && (
@@ -108,7 +108,7 @@ export function ResultsTable({ results, onSaveRecipe }: ResultsTableProps) {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[var(--border)] overflow-auto max-h-96">
+      <div className="rounded-lg border border-[var(--border)] overflow-x-auto overflow-y-auto max-h-96 -mx-px">
         <Table>
           <TableHeader>
             <TableRow>
