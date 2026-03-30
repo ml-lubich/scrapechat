@@ -35,7 +35,7 @@ function LoginForm() {
       if (error) {
         setFormError(error.message);
       } else if (data.session) {
-        window.location.href = "/dashboard";
+        window.location.href = "/chat";
       } else {
         setSuccessMessage(
           "Check your email for a confirmation link to complete sign up."

@@ -142,8 +142,6 @@ export async function POST(request: Request) {
     });
 
     // Increment usage counter
-    await supabase.rpc("increment_scrape_count", { user_id_param: user.id }).maybeSingle();
-    // Fallback if RPC doesn't exist yet
     if (profile) {
       await supabase
         .from("profiles")
