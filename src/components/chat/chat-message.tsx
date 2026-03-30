@@ -2,11 +2,11 @@
 
 import { ChatMessage as ChatMessageType } from "@/types/chat";
 import { cn } from "@/lib/utils";
-import { Bot, User, Copy, Check } from "lucide-react";
+import { Bot, User, Copy, Check, AlertCircle, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ResultsTable } from "@/components/chat/results-table";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -15,15 +15,21 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
   const isUser = message.role === "user";
-  const [copied, setCopied] = useState(false);
+  const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedSchema, setCopiedSchema] = useState(false);
+  const [copiedResults, setCopiedResults] = useState(false);
 
-  const copyScript = () => {
-    if (message.generatedScript) {
-      navigator.clipboard.writeText(message.generatedScript);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+  const copyToClipboard = useCallback((text: string, setter: (v: boolean) => void) => {
+    navigator.clipboard.writeText(text);
+    setter(true);
+    setTimeout(() => setter(false), 2000);
+  }, []);
+
+  const formattedTime = new Intl.DateTimeFormat("en", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(message.timestamp);
 
   return (
     <div
@@ -46,11 +52,19 @@ export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
             "rounded-2xl px-4 py-3 text-sm",
             isUser
               ? "rounded-br-md bg-violet-600 text-white"
-              : "rounded-bl-md bg-[var(--secondary)] text-[var(--foreground)]"
+              : message.status === "error"
+                ? "rounded-bl-md border border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300"
+                : "rounded-bl-md bg-[var(--secondary)] text-[var(--foreground)]"
           )}
         >
+          {message.status === "error" && !isUser && (
+            <AlertCircle className="mb-1 inline-block h-4 w-4 mr-1.5 align-text-bottom" />
+          )}
           {message.content}
         </div>
+        <span className="text-[10px] text-[var(--muted-foreground)] px-1">
+          {formattedTime}
+        </span>
 
         {message.status && message.status !== "complete" && (
           <div className="flex items-center gap-2">
@@ -81,9 +95,9 @@ export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
               <Button
                 variant="ghost"
                 size="icon-xs"
-                onClick={copyScript}
+                onClick={() => copyToClipboard(message.generatedScript!, setCopiedScript)}
               >
-                {copied ? (
+                {copiedScript ? (
                   <Check className="h-3 w-3 text-green-500" />
                 ) : (
                   <Copy className="h-3 w-3" />
@@ -98,13 +112,26 @@ export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
 
         {message.zodSchema && (
           <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2">
-              <Badge variant="secondary" className="text-xs">
-                Zod
-              </Badge>
-              <span className="text-xs text-[var(--muted-foreground)]">
-                Validation Schema
-              </span>
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  Zod
+                </Badge>
+                <span className="text-xs text-[var(--muted-foreground)]">
+                  Validation Schema
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => copyToClipboard(message.zodSchema!, setCopiedSchema)}
+              >
+                {copiedSchema ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </Button>
             </div>
             <pre className="max-h-40 overflow-auto p-3 text-xs">
               <code>{message.zodSchema}</code>
@@ -113,12 +140,33 @@ export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
         )}
 
         {message.results && message.results.data.length > 0 && (
-          <ResultsTable results={message.results} onSaveRecipe={onSaveRecipe} />
+          <>
+            <ResultsTable results={message.results} onSaveRecipe={onSaveRecipe} />
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() =>
+                copyToClipboard(
+                  JSON.stringify(message.results!.data, null, 2),
+                  setCopiedResults
+                )
+              }
+            >
+              {copiedResults ? (
+                <Check className="h-3.5 w-3.5 text-green-500" />
+              ) : (
+                <ClipboardList className="h-3.5 w-3.5" />
+              )}
+              {copiedResults ? "Copied!" : "Copy results"}
+            </Button>
+          </>
         )}
 
         {message.error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">
-            {message.error}
+          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{message.error}</span>
           </div>
         )}
       </div>

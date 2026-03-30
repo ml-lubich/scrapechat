@@ -5,7 +5,7 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { ChatMessage as ChatMessageType } from "@/types/chat";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ShoppingCart, Utensils, Briefcase, Newspaper } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ChatPage() {
@@ -95,14 +95,21 @@ export default function ChatPage() {
         )
       );
     } catch (err) {
+      const rawError = err instanceof Error ? err.message : "Unknown error";
+      const friendlyContent = rawError.includes("fetch")
+        ? "Could not reach the server. Please check your connection and try again."
+        : rawError.includes("timeout") || rawError.includes("Timeout")
+          ? "The scraping request timed out. The target site may be slow or blocking requests."
+          : "Something went wrong while scraping. Please try again or rephrase your request.";
+
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantId
             ? {
                 ...msg,
-                content: "Something went wrong. Please try again.",
+                content: friendlyContent,
                 status: "error" as const,
-                error: err instanceof Error ? err.message : "Unknown error",
+                error: rawError,
               }
             : msg
         )
@@ -119,29 +126,30 @@ export default function ChatPage() {
       <div className="flex flex-1 flex-col">
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center p-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 mb-6">
-              <MessageSquare className="h-8 w-8 text-white" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 mb-6 shadow-lg shadow-violet-500/20">
+              <MessageSquare className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">
-              What do you want to scrape?
+            <h2 className="text-3xl font-bold mb-2">
+              Start scraping
             </h2>
-            <p className="text-[var(--muted-foreground)] text-center max-w-md mb-8">
-              Describe the data you need and the website URL. I&apos;ll generate
-              a Playwright script, run it, and return structured results.
+            <p className="text-[var(--muted-foreground)] text-center max-w-md mb-10">
+              Describe what you want to scrape in plain English. I&apos;ll generate
+              a Playwright script, execute it, and return structured data.
             </p>
-            <div className="grid gap-3 sm:grid-cols-2 max-w-lg w-full">
-              {[
-                "Scrape product names and prices from an Amazon search page",
-                "Get all restaurant names and ratings from Yelp",
-                "Extract job titles and companies from LinkedIn search",
-                "Collect article headlines from Hacker News front page",
-              ].map((example) => (
+            <div className="grid gap-3 sm:grid-cols-2 max-w-xl w-full">
+              {([
+                { icon: ShoppingCart, text: "Scrape product names and prices from an Amazon search page" },
+                { icon: Utensils, text: "Get all restaurant names and ratings from Yelp" },
+                { icon: Briefcase, text: "Extract job titles and companies from LinkedIn search" },
+                { icon: Newspaper, text: "Collect article headlines from Hacker News front page" },
+              ] as const).map(({ icon: Icon, text }) => (
                 <button
-                  key={example}
-                  onClick={() => handleSend(example)}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-left text-sm text-[var(--muted-foreground)] transition-colors hover:border-violet-500/40 hover:text-[var(--foreground)]"
+                  key={text}
+                  onClick={() => handleSend(text)}
+                  className="group flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-4 text-left text-sm text-[var(--muted-foreground)] transition-all hover:border-violet-500/40 hover:text-[var(--foreground)] hover:shadow-md hover:shadow-violet-500/5"
                 >
-                  {example}
+                  <Icon className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <span>{text}</span>
                 </button>
               ))}
             </div>
