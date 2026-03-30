@@ -2,54 +2,182 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { MessageSquare } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MessageSquare, Terminal, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 function LoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
-  const handleGoogleLogin = async () => {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setFormError(null);
+    setSuccessMessage(null);
+
     const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setFormError(error.message);
+      } else {
+        setSuccessMessage(
+          "Check your email for a confirmation link to complete sign up."
+        );
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setFormError(error.message);
+      } else {
+        window.location.href = "/chat";
+      }
+    }
+
+    setLoading(false);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-transparent to-indigo-600/5" />
+    <div className="flex min-h-screen items-center justify-center bg-[var(--background)] grid-bg relative">
+      {/* Background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-[var(--neon)]/10 blur-[100px]" />
+        <div className="absolute bottom-1/3 right-1/4 h-48 w-48 rounded-full bg-[var(--neon-cyan)]/10 blur-[80px]" />
+      </div>
 
       <div className="relative z-10 w-full max-w-md px-6">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 shadow-xl">
+        <div className="glass rounded-2xl p-8 shadow-2xl neon-glow">
           <div className="mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600">
-                <MessageSquare className="h-5 w-5 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--neon)] to-[var(--neon-cyan)]">
+                <Terminal className="h-5 w-5 text-[#030712]" />
               </div>
               <span className="text-xl font-bold">ScrapeChatAI</span>
             </Link>
-            <h1 className="text-2xl font-bold">Welcome back</h1>
+            <h1 className="text-2xl font-bold">
+              {isSignUp ? "Create your account" : "Welcome back"}
+            </h1>
             <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-              Sign in to start scraping with AI
+              {isSignUp
+                ? "Sign up to start scraping with AI"
+                : "Sign in to continue scraping"}
             </p>
           </div>
 
-          {error && (
+          {(error || formError) && (
             <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-              Authentication failed. Please try again.
+              {formError || "Authentication failed. Please try again."}
             </div>
           )}
 
+          {successMessage && (
+            <div className="mb-4 rounded-lg border border-[var(--neon)]/30 bg-[var(--neon)]/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
+              {successMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleEmailAuth} className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12 bg-[var(--background)]/50 border-[var(--border)] focus:border-[var(--neon)] focus:ring-[var(--neon)]/20"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder={isSignUp ? "Min 6 characters" : "Your password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="h-12 bg-[var(--background)]/50 border-[var(--border)] focus:border-[var(--neon)] focus:ring-[var(--neon)]/20"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] text-[#030712] hover:opacity-90 transition-opacity"
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : isSignUp ? (
+                "Create Account"
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setFormError(null);
+                setSuccessMessage(null);
+              }}
+              className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            >
+              {isSignUp
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Sign up"}
+            </button>
+          </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--border)]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[var(--card)] px-2 text-[var(--muted-foreground)]">
+                or
+              </span>
+            </div>
+          </div>
+
           <Button
-            onClick={handleGoogleLogin}
             variant="outline"
-            className="w-full gap-3 h-12 text-base"
+            disabled
+            className="w-full gap-3 h-12 text-base opacity-50 cursor-not-allowed relative"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -70,6 +198,9 @@ function LoginForm() {
               />
             </svg>
             Continue with Google
+            <span className="absolute right-3 rounded-full bg-[var(--muted)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted-foreground)]">
+              Coming soon
+            </span>
           </Button>
 
           <p className="mt-6 text-center text-xs text-[var(--muted-foreground)]">

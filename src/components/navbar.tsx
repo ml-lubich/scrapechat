@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { MessageSquare, Menu, X } from "lucide-react";
+import { Terminal, Menu, X } from "lucide-react";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -23,11 +23,11 @@ export function Navbar() {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-md">
+    <nav className="fixed top-0 z-50 w-full border-b border-[var(--border)] glass">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600">
-            <MessageSquare className="h-4 w-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--neon)] to-[var(--neon-cyan)]">
+            <Terminal className="h-4 w-4 text-[#030712]" />
           </div>
           <span className="text-lg font-bold">ScrapeChatAI</span>
         </Link>
@@ -60,7 +60,9 @@ export function Navbar() {
             Log in
           </Link>
           <Link href="/login">
-            <Button size="sm">Get Started</Button>
+            <Button size="sm" className="bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] text-[#030712] hover:opacity-90 font-semibold">
+              Get Started
+            </Button>
           </Link>
         </div>
 
@@ -117,7 +119,7 @@ export function Navbar() {
             Log in
           </Link>
           <Link href="/login" onClick={closeMobile} className="block pt-1">
-            <Button className="w-full" size="sm">
+            <Button className="w-full bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] text-[#030712] hover:opacity-90 font-semibold" size="sm">
               Get Started
             </Button>
           </Link>

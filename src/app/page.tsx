@@ -12,6 +12,12 @@ import {
   Check,
   Quote,
   ChevronDown,
+  Terminal,
+  Globe,
+  BarChart3,
+  ShoppingCart,
+  FlaskConical,
+  Users,
 } from "lucide-react";
 
 const features = [
@@ -52,6 +58,29 @@ const features = [
   },
 ];
 
+const useCases = [
+  {
+    icon: BarChart3,
+    title: "Market Research",
+    description: "Track competitor pricing, product listings, and market trends across thousands of sites.",
+  },
+  {
+    icon: ShoppingCart,
+    title: "E-Commerce Intelligence",
+    description: "Monitor prices, reviews, and inventory levels to stay ahead of the competition.",
+  },
+  {
+    icon: FlaskConical,
+    title: "Academic Research",
+    description: "Collect structured datasets from public sources for papers and analysis.",
+  },
+  {
+    icon: Users,
+    title: "Lead Generation",
+    description: "Extract business directories, contact info, and company data at scale.",
+  },
+];
+
 const pricingPlans = [
   {
     name: "Free",
@@ -76,6 +105,7 @@ const pricingPlans = [
       "Unlimited recipes",
       "Pagination & infinite scroll",
       "Priority support",
+      "API access",
     ],
     cta: "Start Free Trial",
     highlighted: true,
@@ -136,7 +166,7 @@ const faqs = [
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <details className="group rounded-xl border border-[var(--border)] bg-[var(--card)]">
+    <details className="group rounded-xl border border-[var(--border)] glass transition-all hover:border-[var(--neon)]/20">
       <summary className="flex cursor-pointer items-center justify-between px-6 py-5 text-left font-medium">
         {question}
         <ChevronDown className="h-5 w-5 shrink-0 text-[var(--muted-foreground)] transition-transform group-open:rotate-180" />
@@ -150,78 +180,78 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)] grid-bg">
       <Navbar />
 
       {/* Hero */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-transparent to-indigo-600/10 animate-gradient" />
-        <div className="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
+        {/* Background effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/3 h-96 w-96 rounded-full bg-[var(--neon)]/8 blur-[120px] animate-pulse-glow" />
+          <div className="absolute bottom-1/3 right-1/4 h-72 w-72 rounded-full bg-[var(--neon-cyan)]/8 blur-[100px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
+        </div>
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm text-violet-600 dark:text-violet-400">
-            <Zap className="h-3.5 w-3.5" />
+        <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--neon)]/30 bg-[var(--neon)]/5 px-4 py-1.5 text-sm text-emerald-600 dark:text-[var(--neon)]">
+            <Terminal className="h-3.5 w-3.5" />
             Powered by GPT-4o + Playwright
           </div>
           <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight sm:text-6xl lg:text-7xl">
-            Scrape the web by{" "}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-              chatting with AI
+            Scrape any website in{" "}
+            <span className="bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] bg-clip-text text-transparent">
+              plain English
             </span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-[var(--muted-foreground)] sm:text-xl">
-            Describe what you want in plain English. ScrapeChatAI writes the
-            script, runs it, validates the data, and gives you clean structured
-            results.
+            Describe what you want. AI writes the script, runs it, validates the
+            data, and gives you clean structured results. No code required.
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/login">
-              <Button size="lg" className="gap-2 text-base px-8">
+              <Button size="lg" className="gap-2 text-base px-8 bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] text-[#030712] hover:opacity-90 font-semibold shadow-lg shadow-[var(--neon)]/20">
                 Start Scraping Free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="#features">
-              <Button variant="outline" size="lg" className="text-base px-8">
+              <Button variant="outline" size="lg" className="text-base px-8 border-[var(--border)] hover:border-[var(--neon)]/40">
                 See How It Works
               </Button>
             </Link>
           </div>
 
-          {/* Chat preview */}
+          {/* Terminal-style chat preview */}
           <div className="mx-auto mt-16 max-w-2xl animate-float">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-2xl shadow-violet-500/10">
+            <div className="glass rounded-xl p-6 shadow-2xl shadow-[var(--neon)]/5 neon-glow">
               <div className="mb-4 flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-red-400" />
-                <div className="h-3 w-3 rounded-full bg-yellow-400" />
-                <div className="h-3 w-3 rounded-full bg-green-400" />
-                <span className="ml-2 text-xs text-[var(--muted-foreground)]">
-                  ScrapeChatAI
+                <div className="h-3 w-3 rounded-full bg-red-400/80" />
+                <div className="h-3 w-3 rounded-full bg-yellow-400/80" />
+                <div className="h-3 w-3 rounded-full bg-green-400/80" />
+                <span className="ml-2 text-xs text-[var(--muted-foreground)] font-mono">
+                  scrapechat ~ session
                 </span>
               </div>
-              <div className="space-y-3 text-left text-sm">
-                <div className="flex justify-end">
-                  <div className="rounded-2xl rounded-br-md bg-violet-600 px-4 py-2.5 text-white">
-                    Scrape all restaurant names, ratings, and phone numbers from
-                    this Yelp page
-                  </div>
+              <div className="space-y-3 text-left text-sm font-mono">
+                <div className="flex items-start gap-2">
+                  <span className="text-[var(--neon)] select-none">&gt;</span>
+                  <span>Scrape all restaurant names, ratings, and phone numbers from this Yelp page</span>
                 </div>
-                <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-md bg-[var(--secondary)] px-4 py-2.5 text-[var(--foreground)]">
-                    Got it! I&apos;ll generate a Playwright script to extract
-                    restaurant data from Yelp. Let me create the scraper and Zod
-                    schema for validation...
-                  </div>
+                <div className="flex items-start gap-2 text-[var(--muted-foreground)]">
+                  <span className="text-[var(--neon-cyan)] select-none">&lt;</span>
+                  <span>Generating Playwright script + Zod schema...</span>
                 </div>
-                <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-md bg-[var(--secondary)] px-4 py-2.5 text-[var(--foreground)]">
-                    <span className="text-green-600 dark:text-green-400">
+                <div className="flex items-start gap-2">
+                  <span className="text-[var(--neon-cyan)] select-none">&lt;</span>
+                  <span>
+                    <span className="text-[var(--neon)]">
                       ✓ Found 24 restaurants
                     </span>{" "}
-                    &mdash; All data validated. Ready to export!
-                  </div>
+                    <span className="text-[var(--muted-foreground)]">
+                      — All data validated. Ready to export!
+                    </span>
+                  </span>
                 </div>
+                <div className="h-4 w-2 bg-[var(--neon)] animate-pulse rounded-sm" />
               </div>
             </div>
           </div>
@@ -240,13 +270,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
               <div
                 key={f.title}
-                className="group rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5"
+                className="group glass rounded-xl p-6 transition-all hover:border-[var(--neon)]/30 hover:shadow-lg hover:shadow-[var(--neon)]/5"
               >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 transition-colors group-hover:bg-violet-500/20">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--neon)]/10 text-emerald-600 dark:text-[var(--neon)] transition-colors group-hover:bg-[var(--neon)]/20">
                   <f.icon className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">{f.title}</h3>
@@ -260,7 +290,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="border-y border-[var(--border)] bg-[var(--secondary)]/50 py-24">
+      <section className="border-y border-[var(--border)] py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
@@ -286,7 +316,7 @@ export default function Home() {
               },
             ].map((s) => (
               <div key={s.step} className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-2xl font-bold text-white">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--neon)] to-[var(--neon-cyan)] text-2xl font-bold text-[#030712] font-mono">
                   {s.step}
                 </div>
                 <h3 className="mb-2 text-xl font-semibold">{s.title}</h3>
@@ -297,8 +327,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Use Cases */}
+      <section className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
+              Built for every use case
+            </h2>
+            <p className="text-lg text-[var(--muted-foreground)]">
+              From solo researchers to enterprise data teams.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {useCases.map((uc) => (
+              <div
+                key={uc.title}
+                className="glass rounded-xl p-6 flex gap-4 items-start transition-all hover:border-[var(--neon)]/20"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-cyan)]/10 text-sky-600 dark:text-[var(--neon-cyan)]">
+                  <uc.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="mb-1 font-semibold">{uc.title}</h3>
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {uc.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
-      <section id="pricing" className="py-24">
+      <section id="pricing" className="border-y border-[var(--border)] py-24">
         <div className="mx-auto max-w-4xl px-6">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
@@ -313,14 +375,14 @@ export default function Home() {
             {pricingPlans.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl border p-8 ${
+                className={`rounded-2xl p-8 transition-all ${
                   plan.highlighted
-                    ? "border-violet-500 bg-gradient-to-b from-violet-500/5 to-transparent shadow-lg shadow-violet-500/10"
-                    : "border-[var(--border)] bg-[var(--card)]"
+                    ? "border border-[var(--neon)]/50 glass neon-glow shadow-lg"
+                    : "glass"
                 }`}
               >
                 {plan.highlighted && (
-                  <div className="mb-4 inline-block rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white">
+                  <div className="mb-4 inline-block rounded-full bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] px-3 py-1 text-xs font-semibold text-[#030712]">
                     Most Popular
                   </div>
                 )}
@@ -334,14 +396,18 @@ export default function Home() {
                 <ul className="mt-8 space-y-3">
                   {plan.features.map((feat) => (
                     <li key={feat} className="flex items-center gap-3 text-sm">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-[var(--neon)]" />
                       {feat}
                     </li>
                   ))}
                 </ul>
                 <Link href="/login" className="mt-8 block">
                   <Button
-                    className="w-full"
+                    className={`w-full ${
+                      plan.highlighted
+                        ? "bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] text-[#030712] hover:opacity-90 font-semibold"
+                        : ""
+                    }`}
                     variant={plan.highlighted ? "default" : "outline"}
                   >
                     {plan.cta}
@@ -354,7 +420,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="border-y border-[var(--border)] bg-[var(--secondary)]/50 py-24">
+      <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
@@ -368,9 +434,9 @@ export default function Home() {
             {testimonials.map((t) => (
               <div
                 key={t.name}
-                className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6"
+                className="glass rounded-xl p-6 transition-all hover:border-[var(--neon)]/20"
               >
-                <Quote className="mb-4 h-8 w-8 text-violet-500/40" />
+                <Quote className="mb-4 h-8 w-8 text-[var(--neon)]/40" />
                 <p className="mb-6 text-sm leading-relaxed text-[var(--muted-foreground)]">
                   &ldquo;{t.quote}&rdquo;
                 </p>
@@ -387,7 +453,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-24">
+      <section id="faq" className="border-t border-[var(--border)] py-24">
         <div className="mx-auto max-w-3xl px-6">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
@@ -412,18 +478,18 @@ export default function Home() {
       {/* Final CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 px-8 py-16 shadow-2xl shadow-violet-500/20">
-            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+          <div className="glass rounded-2xl px-8 py-16 shadow-2xl neon-glow border border-[var(--neon)]/20">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
               Ready to scrape smarter?
             </h2>
-            <p className="mx-auto mb-8 max-w-xl text-lg text-violet-100">
+            <p className="mx-auto mb-8 max-w-xl text-lg text-[var(--muted-foreground)]">
               Join thousands of developers and analysts who extract web data in
               seconds — no boilerplate, no broken selectors, just results.
             </p>
             <Link href="/login">
               <Button
                 size="lg"
-                className="gap-2 bg-white text-violet-700 hover:bg-violet-50 text-base px-8"
+                className="gap-2 bg-gradient-to-r from-[var(--neon)] to-[var(--neon-cyan)] text-[#030712] hover:opacity-90 text-base px-8 font-semibold shadow-lg shadow-[var(--neon)]/20"
               >
                 Start Scraping Free
                 <ArrowRight className="h-4 w-4" />
@@ -440,8 +506,8 @@ export default function Home() {
             {/* Brand */}
             <div>
               <div className="mb-4 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600">
-                  <MessageSquare className="h-4 w-4 text-white" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--neon)] to-[var(--neon-cyan)]">
+                  <Terminal className="h-4 w-4 text-[#030712]" />
                 </div>
                 <span className="text-lg font-bold">ScrapeChatAI</span>
               </div>
