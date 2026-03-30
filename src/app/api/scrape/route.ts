@@ -71,6 +71,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const MAX_MESSAGE_LENGTH = 2000;
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters.` },
+        { status: 400 }
+      );
+    }
+
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "OpenAI API key not configured" },
@@ -108,7 +116,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = JSON.parse(responseText);
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      console.error("Invalid JSON from AI response:", responseText);
+      return NextResponse.json(
+        { error: "Failed to parse AI response. Please try again." },
+        { status: 502 }
+      );
+    }
 
     const results = Array.isArray(data.results) ? data.results : null;
     const itemsCount = results ? results.length : 0;

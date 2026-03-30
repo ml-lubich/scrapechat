@@ -92,7 +92,7 @@ export default function ChatPage() {
 
     const name = message.content.slice(0, 60) + (message.content.length > 60 ? "..." : "");
 
-    await supabase.from("recipes").insert({
+    const { error } = await supabase.from("recipes").insert({
       user_id: user.id,
       name,
       description: message.content,
@@ -100,6 +100,11 @@ export default function ChatPage() {
       script_template: message.generatedScript,
       schema_definition: message.zodSchema || null,
     });
+
+    if (error) {
+      console.error("Failed to save recipe:", error);
+      alert("Failed to save recipe. Please try again.");
+    }
   }, []);
 
   const handleNewChat = useCallback(() => {
