@@ -10,6 +10,46 @@ import { MessageSquare, ShoppingCart, Utensils, Briefcase, Newspaper } from "luc
 import { createClient } from "@/lib/supabase/client";
 import { HISTORY_LIMIT, CONTEXT_MESSAGE_LIMIT } from "@/lib/constants";
 
+function ChatSkeleton() {
+  return (
+    <div className="flex-1 overflow-auto px-6">
+      <div className="mx-auto max-w-3xl space-y-6 py-4">
+        {/* Skeleton message pairs: user (right) then assistant (left) */}
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-4">
+            {/* User message skeleton (right-aligned) */}
+            <div className="flex justify-end gap-3">
+              <div className="max-w-[60%] space-y-2">
+                <div className="rounded-2xl rounded-br-md bg-violet-600/20 px-4 py-3 animate-pulse">
+                  <div className="h-4 w-48 rounded bg-violet-400/20" />
+                </div>
+                <div className="flex justify-end px-1">
+                  <div className="h-3 w-12 rounded bg-[var(--secondary)] animate-pulse" />
+                </div>
+              </div>
+              <div className="h-8 w-8 shrink-0 rounded-lg bg-[var(--secondary)] animate-pulse" />
+            </div>
+            {/* Assistant message skeleton (left-aligned) */}
+            <div className="flex justify-start gap-3">
+              <div className="h-8 w-8 shrink-0 rounded-lg bg-violet-600/20 animate-pulse" />
+              <div className="max-w-[70%] space-y-2">
+                <div className="rounded-2xl rounded-bl-md bg-[var(--secondary)] px-4 py-3 animate-pulse space-y-2">
+                  <div className="h-4 w-64 rounded bg-[var(--muted-foreground)]/10" />
+                  <div className="h-4 w-52 rounded bg-[var(--muted-foreground)]/10" />
+                  {i === 1 && <div className="h-4 w-40 rounded bg-[var(--muted-foreground)]/10" />}
+                </div>
+                <div className="px-1">
+                  <div className="h-3 w-12 rounded bg-[var(--secondary)] animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function scrapeJobToMessages(job: ScrapeJob): ChatMessageType[] {
   const userMsg: ChatMessageType = {
     id: `${job.id}-user`,
@@ -285,7 +325,9 @@ export default function ChatPage() {
       />
 
       <div className="flex flex-1 flex-col">
-        {messages.length === 0 ? (
+        {!historyLoaded ? (
+          <ChatSkeleton />
+        ) : messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center p-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 mb-6 shadow-lg shadow-violet-500/20">
               <MessageSquare className="h-10 w-10 text-white" />

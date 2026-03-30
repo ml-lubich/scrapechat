@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, Clipboard, Save } from "lucide-react";
 import { useState } from "react";
+import { toCsv } from "@/lib/utils";
 
 interface ResultsTableProps {
   results: ScrapedResult;
@@ -45,18 +46,7 @@ export function ResultsTable({ results, onSaveRecipe }: ResultsTableProps) {
   };
 
   const exportCSV = () => {
-    const header = columns.join(",");
-    const rows = data.map((row) =>
-      columns
-        .map((col) => {
-          const val = String(row[col] ?? "");
-          return val.includes(",") || val.includes('"')
-            ? `"${val.replace(/"/g, '""')}"`
-            : val;
-        })
-        .join(",")
-    );
-    const csv = [header, ...rows].join("\n");
+    const csv = toCsv(data as Record<string, unknown>[]);
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
