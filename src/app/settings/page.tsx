@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/database";
 import { FREE_TIER_LIMIT } from "@/lib/constants";
+import { RecentActivity } from "@/components/settings/recent-activity";
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -154,13 +155,7 @@ export default function SettingsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[var(--border)] py-10">
-                  <History className="mb-3 h-8 w-8 text-[var(--muted-foreground)]" />
-                  <p className="text-sm font-medium text-[var(--muted-foreground)]">Coming soon</p>
-                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                    View your recent scraping jobs and their results here.
-                  </p>
-                </div>
+                <RecentActivity />
               </CardContent>
             </Card>
 
