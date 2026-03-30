@@ -21,9 +21,16 @@ export default function RecipesPage() {
 
   const loadRecipes = useCallback(async () => {
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     const { data } = await supabase
       .from("recipes")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     setRecipes(data || []);
@@ -39,16 +46,32 @@ export default function RecipesPage() {
       return;
     }
     const supabase = createClient();
-    await supabase.from("recipes").delete().eq("id", id);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("recipes")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Failed to delete recipe:", error);
+      return;
+    }
     setRecipes((prev) => prev.filter((r) => r.id !== id));
   };
 
   const handleRun = async (recipe: Recipe) => {
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     await supabase
       .from("recipes")
       .update({ times_used: recipe.times_used + 1 })
-      .eq("id", recipe.id);
+      .eq("id", recipe.id)
+      .eq("user_id", user.id);
 
     window.location.href = `/chat?message=${encodeURIComponent(recipe.description || recipe.name)}`;
   };
