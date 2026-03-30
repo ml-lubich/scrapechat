@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
-import { FREE_TIER_LIMIT, MAX_MESSAGE_LENGTH } from "@/lib/constants";
+import {
+  FREE_TIER_LIMIT,
+  MAX_MESSAGE_LENGTH,
+  SCRAPE_RATE_LIMIT_MAX,
+  SCRAPE_RATE_LIMIT_WINDOW_MS,
+  MAX_HISTORY_ITEMS,
+  MAX_HISTORY_CONTENT_LENGTH,
+  OPENAI_TIMEOUT_MS,
+} from "@/lib/constants";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -44,6 +53,19 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
+      );
+    }
+
+    // Rate limit per user
+    const rateLimitKey = `scrape:${user.id}`;
+    const rateResult = checkRateLimit(rateLimitKey, SCRAPE_RATE_LIMIT_MAX, SCRAPE_RATE_LIMIT_WINDOW_MS);
+    if (!rateResult.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait before trying again." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil((rateResult.retryAfterMs ?? 1000) / 1000)) },
+        }
       );
     }
 
@@ -90,21 +112,45 @@ export async function POST(request: Request) {
     ];
 
     if (Array.isArray(history)) {
-      for (const msg of history) {
-        if (msg.role === "user" || msg.role === "assistant") {
-          chatMessages.push({ role: msg.role, content: String(msg.content) });
+      const validHistory = history.slice(0, MAX_HISTORY_ITEMS);
+      for (const msg of validHistory) {
+        if (
+          (msg.role === "user" || msg.role === "assistant") &&
+          typeof msg.content === "string" &&
+          msg.content.length <= MAX_HISTORY_CONTENT_LENGTH
+        ) {
+          chatMessages.push({ role: msg.role, content: msg.content });
         }
       }
     }
 
     chatMessages.push({ role: "user", content: message });
 
-    const completion = await getOpenAI().chat.completions.create({
-      model: "gpt-4o",
-      messages: chatMessages,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
+
+    let completion;
+    try {
+      completion = await getOpenAI().chat.completions.create(
+        {
+          model: "gpt-4o",
+          messages: chatMessages,
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+        },
+        { signal: controller.signal }
+      );
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        return NextResponse.json(
+          { error: "AI request timed out. Please try a simpler request." },
+          { status: 504 }
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const responseText = completion.choices[0]?.message?.content;
     if (!responseText) {

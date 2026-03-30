@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { resetAllRateLimits } from "@/lib/rate-limit";
 
 // --- Mocks ---
 
@@ -69,6 +70,7 @@ function setupAuthenticatedUser(profile = fakeProfile) {
 describe("POST /api/scrape", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetAllRateLimits();
     process.env.OPENAI_API_KEY = "sk-test";
   });
 
