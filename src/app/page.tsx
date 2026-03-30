@@ -10,6 +10,8 @@ import {
   RefreshCw,
   ArrowRight,
   Check,
+  Quote,
+  ChevronDown,
 } from "lucide-react";
 
 const features = [
@@ -79,6 +81,72 @@ const pricingPlans = [
     highlighted: true,
   },
 ];
+
+const testimonials = [
+  {
+    quote:
+      "I used to spend hours writing scrapers from scratch. Now I just describe what I need and ScrapeChatAI handles the rest. It saved our team 20+ hours a week.",
+    name: "Marcus Chen",
+    role: "Senior Data Engineer",
+    company: "DataFlow Systems",
+  },
+  {
+    quote:
+      "We monitor competitor pricing across 50+ sites. ScrapeChatAI lets our non-technical marketers set up scrapers without bugging the dev team.",
+    name: "Priya Sharma",
+    role: "Growth Marketing Lead",
+    company: "ShopMetrics",
+  },
+  {
+    quote:
+      "The Zod validation is a game-changer for research. I know every data point is typed and validated before it hits my analysis pipeline.",
+    name: "Dr. James Okafor",
+    role: "Computational Social Scientist",
+    company: "University of Toronto",
+  },
+];
+
+const faqs = [
+  {
+    question: "What sites can I scrape?",
+    answer:
+      "ScrapeChatAI works with any publicly accessible website. It uses headless Playwright browsers, so it handles JavaScript-rendered pages, SPAs, and dynamic content just like a real browser would.",
+  },
+  {
+    question: "Is web scraping legal?",
+    answer:
+      "Scraping publicly available data is generally legal, but you should always respect a site's robots.txt and terms of service. ScrapeChatAI is a tool — you're responsible for using it in compliance with applicable laws and website policies.",
+  },
+  {
+    question: "How does data validation work?",
+    answer:
+      "After scraping, ScrapeChatAI uses Zod schemas (generated automatically by GPT-4o) to validate every field of the extracted data. If a field is missing, has the wrong type, or doesn't match the expected format, you'll know immediately.",
+  },
+  {
+    question: "Can I schedule recurring scrapes?",
+    answer:
+      "Not yet — but it's on our roadmap. Today you can save any scraping workflow as a recipe and re-run it with one click whenever you need fresh data.",
+  },
+  {
+    question: "What export formats are supported?",
+    answer:
+      "You can export scraped data as JSON or CSV, or copy it directly to your clipboard. All exports include the validated, structured data so it's ready for your pipeline or spreadsheet.",
+  },
+];
+
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="group rounded-xl border border-[var(--border)] bg-[var(--card)]">
+      <summary className="flex cursor-pointer items-center justify-between px-6 py-5 text-left font-medium">
+        {question}
+        <ChevronDown className="h-5 w-5 shrink-0 text-[var(--muted-foreground)] transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="px-6 pb-5 text-sm text-[var(--muted-foreground)] leading-relaxed">
+        {answer}
+      </div>
+    </details>
+  );
+}
 
 export default function Home() {
   return (
@@ -285,20 +353,167 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <section className="border-y border-[var(--border)] bg-[var(--secondary)]/50 py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
+              Loved by data teams everywhere
+            </h2>
+            <p className="text-lg text-[var(--muted-foreground)]">
+              See what our users are building with ScrapeChatAI.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {testimonials.map((t) => (
+              <div
+                key={t.name}
+                className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6"
+              >
+                <Quote className="mb-4 h-8 w-8 text-violet-500/40" />
+                <p className="mb-6 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div>
+                  <p className="text-sm font-semibold">{t.name}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {t.role}, {t.company}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-24">
+        <div className="mx-auto max-w-3xl px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
+              Frequently asked questions
+            </h2>
+            <p className="text-lg text-[var(--muted-foreground)]">
+              Everything you need to know about ScrapeChatAI.
+            </p>
+          </div>
+          <div className="space-y-4">
+            {faqs.map((faq) => (
+              <FaqItem
+                key={faq.question}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 px-8 py-16 shadow-2xl shadow-violet-500/20">
+            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+              Ready to scrape smarter?
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl text-lg text-violet-100">
+              Join thousands of developers and analysts who extract web data in
+              seconds — no boilerplate, no broken selectors, just results.
+            </p>
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="gap-2 bg-white text-violet-700 hover:bg-violet-50 text-base px-8"
+              >
+                Start Scraping Free
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-[var(--border)] py-12">
         <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-600 to-indigo-600">
-                <MessageSquare className="h-3 w-3 text-white" />
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div>
+              <div className="mb-4 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600">
+                  <MessageSquare className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-lg font-bold">ScrapeChatAI</span>
               </div>
-              <span className="text-sm font-semibold">ScrapeChatAI</span>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                AI-powered web scraping. Describe it, scrape it, export it.
+              </p>
             </div>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              &copy; {new Date().getFullYear()} ScrapeChatAI. All rights
-              reserved.
-            </p>
+
+            {/* Product */}
+            <div>
+              <h4 className="mb-4 text-sm font-semibold">Product</h4>
+              <ul className="space-y-2 text-sm text-[var(--muted-foreground)]">
+                <li>
+                  <Link href="#features" className="hover:text-[var(--foreground)] transition-colors">
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#pricing" className="hover:text-[var(--foreground)] transition-colors">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#faq" className="hover:text-[var(--foreground)] transition-colors">
+                    FAQ
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="mb-4 text-sm font-semibold">Company</h4>
+              <ul className="space-y-2 text-sm text-[var(--muted-foreground)]">
+                <li>
+                  <Link href="#" className="hover:text-[var(--foreground)] transition-colors">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="hover:text-[var(--foreground)] transition-colors">
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="hover:text-[var(--foreground)] transition-colors">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="mb-4 text-sm font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-[var(--muted-foreground)]">
+                <li>
+                  <Link href="#" className="hover:text-[var(--foreground)] transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="hover:text-[var(--foreground)] transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 border-t border-[var(--border)] pt-8 text-center text-sm text-[var(--muted-foreground)]">
+            &copy; {new Date().getFullYear()} ScrapeChatAI. All rights reserved.
           </div>
         </div>
       </footer>
