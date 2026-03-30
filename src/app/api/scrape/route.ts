@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { message } = await request.json();
+    const { message, history } = await request.json();
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -78,12 +78,24 @@ export async function POST(request: Request) {
       );
     }
 
+    // Build messages array with optional conversation history
+    const chatMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
+      { role: "system", content: SYSTEM_PROMPT },
+    ];
+
+    if (Array.isArray(history)) {
+      for (const msg of history) {
+        if (msg.role === "user" || msg.role === "assistant") {
+          chatMessages.push({ role: msg.role, content: String(msg.content) });
+        }
+      }
+    }
+
+    chatMessages.push({ role: "user", content: message });
+
     const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: message },
-      ],
+      messages: chatMessages,
       temperature: 0.2,
       response_format: { type: "json_object" },
     });

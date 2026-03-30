@@ -5,16 +5,74 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { ChatMessage as ChatMessageType } from "@/types/chat";
+import { ScrapeJob } from "@/types/database";
 import { MessageSquare, ShoppingCart, Utensils, Briefcase, Newspaper } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+
+const HISTORY_LIMIT = 20;
+const CONTEXT_MESSAGE_LIMIT = 6;
+
+function scrapeJobToMessages(job: ScrapeJob): ChatMessageType[] {
+  const userMsg: ChatMessageType = {
+    id: `${job.id}-user`,
+    role: "user",
+    content: job.message,
+    timestamp: new Date(job.created_at),
+    status: "complete",
+  };
+
+  const assistantMsg: ChatMessageType = {
+    id: `${job.id}-assistant`,
+    role: "assistant",
+    content: job.ai_response || "",
+    timestamp: new Date(job.created_at),
+    status: job.status === "error" ? "error" : "complete",
+    generatedScript: job.generated_script || undefined,
+    zodSchema: job.zod_schema || undefined,
+    results: job.results
+      ? { data: job.results, itemsCount: job.items_count }
+      : undefined,
+    error: job.error || undefined,
+  };
+
+  return [userMsg, assistantMsg];
+}
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [recentJobs, setRecentJobs] = useState<ScrapeJob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = "Chat — ScrapeChatAI";
+  }, []);
+
+  // Load chat history from scrape_jobs on mount
+  useEffect(() => {
+    async function loadHistory() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: jobs } = await supabase
+        .from("scrape_jobs")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(HISTORY_LIMIT);
+
+      if (jobs && jobs.length > 0) {
+        setRecentJobs(jobs);
+        const chronological = [...jobs].reverse();
+        const chatMessages = chronological.flatMap(scrapeJobToMessages);
+        setMessages(chatMessages);
+      }
+      setHistoryLoaded(true);
+    }
+
+    loadHistory();
   }, []);
 
   const scrollToBottom = () => {
@@ -48,6 +106,13 @@ export default function ChatPage() {
     setMessages([]);
   }, []);
 
+  const handleSelectJob = useCallback((jobId: string) => {
+    const el = document.getElementById(`${jobId}-user`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
   const handleSend = async (content: string) => {
     const userMessage: ChatMessageType = {
       id: crypto.randomUUID(),
@@ -72,10 +137,16 @@ export default function ChatPage() {
     ]);
 
     try {
+      // Build conversation history for multi-turn context
+      const recentMessages = messages
+        .filter((m) => m.status === "complete")
+        .slice(-CONTEXT_MESSAGE_LIMIT)
+        .map((m) => ({ role: m.role, content: m.content }));
+
       const res = await fetch("/api/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({ message: content, history: recentMessages }),
       });
 
       const data = await res.json();
@@ -98,6 +169,19 @@ export default function ChatPage() {
             : msg
         )
       );
+
+      // Refresh sidebar with latest jobs
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: jobs } = await supabase
+          .from("scrape_jobs")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(HISTORY_LIMIT);
+        if (jobs) setRecentJobs(jobs);
+      }
     } catch (err) {
       const rawError = err instanceof Error ? err.message : "Unknown error";
       const friendlyContent = rawError.includes("fetch")
@@ -125,7 +209,11 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen bg-[var(--background)]">
-      <ChatSidebar onNewChat={handleNewChat} />
+      <ChatSidebar
+        onNewChat={handleNewChat}
+        recentJobs={recentJobs}
+        onSelectJob={handleSelectJob}
+      />
 
       <div className="flex flex-1 flex-col">
         {messages.length === 0 ? (

@@ -33,6 +33,7 @@ export function ChatMessage({ message, onSaveRecipe }: ChatMessageProps) {
 
   return (
     <div
+      id={message.id}
       className={cn("flex gap-3 py-4", isUser ? "justify-end" : "justify-start")}
     >
       {!isUser && (

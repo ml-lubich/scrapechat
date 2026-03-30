@@ -16,12 +16,29 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { ScrapeJob } from "@/types/database";
+
+const SIDEBAR_LABEL_MAX_LENGTH = 40;
+
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
 
 interface ChatSidebarProps {
   onNewChat?: () => void;
+  recentJobs?: ScrapeJob[];
+  onSelectJob?: (jobId: string) => void;
 }
 
-export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
+export function ChatSidebar({ onNewChat, recentJobs = [], onSelectJob }: ChatSidebarProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -85,9 +102,36 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
           <p className="px-2 text-xs font-medium text-[var(--muted-foreground)] mb-2">
             Recent
           </p>
-          <p className="px-2 text-xs text-[var(--muted-foreground)]">
-            No conversations yet
-          </p>
+          {recentJobs.length === 0 ? (
+            <p className="px-2 text-xs text-[var(--muted-foreground)]">
+              No conversations yet
+            </p>
+          ) : (
+            <div className="space-y-0.5">
+              {recentJobs.map((job) => {
+                const label = job.message.length > SIDEBAR_LABEL_MAX_LENGTH
+                  ? job.message.slice(0, SIDEBAR_LABEL_MAX_LENGTH) + "…"
+                  : job.message;
+                return (
+                  <button
+                    key={job.id}
+                    onClick={() => {
+                      onSelectJob?.(job.id);
+                      setOpen(false);
+                    }}
+                    className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-[var(--secondary)]"
+                  >
+                    <span className="text-sm truncate text-[var(--foreground)]">
+                      {label}
+                    </span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">
+                      {formatRelativeTime(job.created_at)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="border-t border-[var(--border)] p-3 space-y-1">
