@@ -129,6 +129,45 @@ export default function ChatPage() {
     }
   }, []);
 
+  const handleDeleteJob = useCallback(async (jobId: string) => {
+    // Optimistic UI: remove from sidebar and messages immediately
+    setRecentJobs((prev) => prev.filter((j) => j.id !== jobId));
+    setMessages((prev) => prev.filter((m) => !m.id.startsWith(jobId)));
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("scrape_jobs")
+      .delete()
+      .eq("id", jobId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Failed to delete job:", error);
+    }
+  }, []);
+
+  const handleClearHistory = useCallback(async () => {
+    // Optimistic UI: clear everything immediately
+    setRecentJobs([]);
+    setMessages([]);
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("scrape_jobs")
+      .delete()
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Failed to clear history:", error);
+    }
+  }, []);
+
   const handleRetry = useCallback((failedMessageId: string) => {
     const failedIndex = messages.findIndex((m) => m.id === failedMessageId);
     if (failedIndex < 1) return;
@@ -241,6 +280,8 @@ export default function ChatPage() {
         onNewChat={handleNewChat}
         recentJobs={recentJobs}
         onSelectJob={handleSelectJob}
+        onDeleteJob={handleDeleteJob}
+        onClearHistory={handleClearHistory}
       />
 
       <div className="flex flex-1 flex-col">

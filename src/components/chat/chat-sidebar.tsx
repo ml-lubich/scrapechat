@@ -10,6 +10,7 @@ import {
   Settings,
   Menu,
   X,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -36,9 +37,11 @@ interface ChatSidebarProps {
   onNewChat?: () => void;
   recentJobs?: ScrapeJob[];
   onSelectJob?: (jobId: string) => void;
+  onDeleteJob?: (jobId: string) => void;
+  onClearHistory?: () => void;
 }
 
-export function ChatSidebar({ onNewChat, recentJobs = [], onSelectJob }: ChatSidebarProps) {
+export function ChatSidebar({ onNewChat, recentJobs = [], onSelectJob, onDeleteJob, onClearHistory }: ChatSidebarProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -99,9 +102,24 @@ export function ChatSidebar({ onNewChat, recentJobs = [], onSelectJob }: ChatSid
         </div>
 
         <div className="flex-1 overflow-auto px-3 py-2">
-          <p className="px-2 text-xs font-medium text-[var(--muted-foreground)] mb-2">
-            Recent
-          </p>
+          <div className="flex items-center justify-between px-2 mb-2">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">
+              Recent
+            </p>
+            {recentJobs.length > 0 && (
+              <button
+                onClick={() => {
+                  if (window.confirm("Clear all chat history? This cannot be undone.")) {
+                    onClearHistory?.();
+                  }
+                }}
+                className="text-[10px] text-[var(--muted-foreground)] hover:text-red-500 transition-colors"
+                data-testid="clear-all-button"
+              >
+                Clear All
+              </button>
+            )}
+          </div>
           {recentJobs.length === 0 ? (
             <p className="px-2 text-xs text-[var(--muted-foreground)]">
               No conversations yet
@@ -113,21 +131,36 @@ export function ChatSidebar({ onNewChat, recentJobs = [], onSelectJob }: ChatSid
                   ? job.message.slice(0, SIDEBAR_LABEL_MAX_LENGTH) + "…"
                   : job.message;
                 return (
-                  <button
+                  <div
                     key={job.id}
-                    onClick={() => {
-                      onSelectJob?.(job.id);
-                      setOpen(false);
-                    }}
-                    className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-[var(--secondary)]"
+                    className="group relative flex items-center rounded-lg transition-colors hover:bg-[var(--secondary)]"
                   >
-                    <span className="text-sm truncate text-[var(--foreground)]">
-                      {label}
-                    </span>
-                    <span className="text-[10px] text-[var(--muted-foreground)]">
-                      {formatRelativeTime(job.created_at)}
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        onSelectJob?.(job.id);
+                        setOpen(false);
+                      }}
+                      className="flex w-full flex-col gap-0.5 px-2 py-2 text-left"
+                    >
+                      <span className="text-sm truncate text-[var(--foreground)] pr-6">
+                        {label}
+                      </span>
+                      <span className="text-[10px] text-[var(--muted-foreground)]">
+                        {formatRelativeTime(job.created_at)}
+                      </span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteJob?.(job.id);
+                      }}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                      aria-label={`Delete job: ${label}`}
+                      data-testid={`delete-job-${job.id}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
