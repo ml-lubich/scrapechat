@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { RecipeCard, RecipeUpdateFields } from "@/components/recipes/recipe-card";
-import { BookOpen, Loader2, Search, MessageSquare } from "lucide-react";
+import { BookOpen, Loader2, Search, MessageSquare, Info } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Recipe } from "@/types/database";
@@ -26,13 +26,18 @@ export default function RecipesPage() {
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("recipes")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    setRecipes(data || []);
+    if (error) {
+      console.error("Failed to fetch recipes:", error);
+      setRecipes([]);
+    } else {
+      setRecipes(data || []);
+    }
     setLoading(false);
   }, []);
 
@@ -56,6 +61,7 @@ export default function RecipesPage() {
 
     if (error) {
       console.error("Failed to delete recipe:", error);
+      alert("An error occurred while deleting the recipe. Please try again.");
       return;
     }
     setRecipes((prev) => prev.filter((r) => r.id !== id));
@@ -88,6 +94,7 @@ export default function RecipesPage() {
 
     if (error) {
       console.error("Failed to update recipe:", error);
+      alert("An error occurred while saving the recipe updates. Please try again.");
       return false;
     }
 
@@ -110,7 +117,8 @@ export default function RecipesPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold">Saved Recipes</h1>
             <p className="mt-2 text-[var(--muted-foreground)]">
-              Reusable scraping workflows you&apos;ve saved from previous chats.
+              Reusable scraping workflows you've saved from previous chats.
+              <Info className="ml-2 inline-block h-5 w-5 align-middle" title="You can run or edit recipes below." />
             </p>
           </div>
 
@@ -136,7 +144,7 @@ export default function RecipesPage() {
               <BookOpen className="mb-4 h-12 w-12 text-[var(--muted-foreground)]" />
               <h3 className="text-lg font-semibold">No recipes yet</h3>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                After scraping, click &quot;Save Recipe&quot; to save your workflow.
+                After scraping, click "Save Recipe" to save your workflow.
               </p>
               <Link href="/chat">
                 <Button variant="outline" className="mt-4 gap-2">
