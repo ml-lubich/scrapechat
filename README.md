@@ -42,6 +42,7 @@ flowchart LR
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [🗺️ Repository map](#️-repository-map)
+- [📊 Code composition](#-code-composition)
 
 ## Scrape algorithm
 
@@ -246,4 +247,20 @@ mindmap
       next.config.ts
       package.json
       tsconfig.json
+```
+
+
+## 📊 Code composition
+
+File-type breakdown of source under this repo (skips `.git`, `node_modules`, build caches, lockfiles).
+
+```mermaid
+pie showData title File-type composition of scrapechat (81 files)
+    "TypeScript" : 62
+    "Other" : 8
+    "Markdown" : 5
+    "JSON" : 3
+    "JavaScript" : 1
+    "SQL" : 1
+    "CSS" : 1
 ```
