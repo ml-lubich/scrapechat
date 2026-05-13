@@ -1,6 +1,44 @@
 # ScrapeChatAI
 
-LLM-powered web scraper you chat with. Describe what you want to scrape in plain English -- ScrapeChatAI generates Playwright scripts, validates output with Zod schemas, and returns clean structured data.
+> LLM-powered web scraper you chat with. Describe what you want to
+> scrape in plain English — ScrapeChatAI generates Playwright scripts,
+> validates output with Zod schemas, and returns clean structured data.
+
+```mermaid
+flowchart LR
+    USER[("👤 user")]
+    CHAT["💬 chat UI"]
+    AUTH{{"🔐 Supabase Auth<br/>Google OAuth"}}
+    AI["🤖 GPT-4o<br/>generate Playwright"]
+    PW["🎭 Playwright<br/>run script"]
+    SITE[("🌐 target site")]
+    ZOD["✅ Zod schema<br/>validate"]
+    DB[("🗄 Supabase<br/>jobs · recipes")]
+    EXPORT[/"📦 JSON · CSV"/]
+    STRIPE["💳 Stripe<br/>Free 50/mo · Pro $29"]
+
+    USER --> AUTH --> CHAT
+    CHAT --> AI --> PW --> SITE
+    SITE --> PW --> ZOD --> DB
+    DB --> CHAT
+    CHAT --> EXPORT
+    AUTH --> STRIPE
+
+    classDef io fill:#0e1116,stroke:#2f81f7,stroke-width:1.5px,color:#e6edf3;
+    classDef tool fill:#161b22,stroke:#3fb950,stroke-width:1.5px,color:#e6edf3;
+    classDef brain fill:#161b22,stroke:#d29922,stroke-width:1.5px,color:#e6edf3;
+    classDef out fill:#0e1116,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3;
+    class USER,SITE,DB io;
+    class PW,ZOD,STRIPE,CHAT tool;
+    class AI,AUTH brain;
+    class EXPORT out;
+```
+
+## Table of contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
 
 ## Features
 
