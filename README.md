@@ -37,8 +37,55 @@ flowchart LR
 ## Table of contents
 
 - [Features](#features)
+- [Scrape algorithm](#scrape-algorithm)
+- [Chat-to-data sequence](#chat-to-data-sequence)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+
+## Scrape algorithm
+
+```mermaid
+flowchart LR
+    A([user prompt])
+    B["GPT-4o<br/>generate Playwright + Zod schema"]
+    C["sandbox run script"]
+    D["extract raw data"]
+    E["Zod validate"]
+    F{"valid?"}
+    G["persist scrape_jobs row"]
+    H["GPT-4o<br/>repair script"]
+    I["export JSON / CSV"]
+    Z([done])
+    A --> B --> C --> D --> E --> F
+    F -- yes --> G --> I --> Z
+    F -- no  --> H --> C
+```
+
+## Chat-to-data sequence
+
+```mermaid
+sequenceDiagram
+    participant U as user
+    participant UI as chat UI
+    participant API as /api/scrape
+    participant AI as GPT-4o
+    participant PW as Playwright runner
+    participant DB as Supabase
+    participant ST as Stripe
+
+    U->>UI: "scrape products from X"
+    UI->>ST: check quota
+    ST-->>UI: ok / over-limit
+    UI->>API: POST chat message
+    API->>AI: generate(script + schema)
+    AI-->>API: code
+    API->>PW: run code
+    PW-->>API: rows
+    API->>API: Zod validate
+    API->>DB: insert scrape_job
+    API-->>UI: results
+    UI-->>U: table + export buttons
+```
 
 ## Features
 
