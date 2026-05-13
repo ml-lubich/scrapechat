@@ -41,6 +41,7 @@ flowchart LR
 - [Chat-to-data sequence](#chat-to-data-sequence)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [🗺️ Repository map](#️-repository-map)
 
 ## Scrape algorithm
 
@@ -223,3 +224,26 @@ supabase/
 ## License
 
 MIT
+
+
+## 🗺️ Repository map
+
+Top-level layout of `scrapechat` rendered as a Mermaid mindmap (auto-generated from the on-disk tree).
+
+```mermaid
+mindmap
+  root((scrapechat))
+    src/
+      app
+      components
+      lib
+      proxy.ts
+      types
+    supabase/
+      migrations
+    files
+      README.md
+      next.config.ts
+      package.json
+      tsconfig.json
+```
